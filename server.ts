@@ -53,47 +53,42 @@ const options = {
   retryWrites: true
 };
 
-const uri =
-  'mongodb://xxyyzz2050:Xx159753%2540%2540@cluster-test-shard-00-00-kuwit.gcp.mongodb.net:27017,cluster-test-shard-00-01-kuwit.gcp.mongodb.net:27017,cluster-test-shard-00-02-kuwit.gcp.mongodb.net:27017/test?ssl=true&replicaSet=Cluster-test-shard-0&authSource=admin&retryWrites=true&w=majority';
+const auth = 'xxyyzz2050:Xx159753%40%40';
+const uri = `mongodb://${auth}@cluster-test-shard-00-00-kuwit.gcp.mongodb.net:27017,cluster-test-shard-00-01-kuwit.gcp.mongodb.net:27017,cluster-test-shard-00-02-kuwit.gcp.mongodb.net:27017/test?ssl=true&replicaSet=Cluster-test-shard-0&authSource=admin&retryWrites=true&w=majority`;
+const uri_srv = `mongodb+srv://${auth}@cluster-test-kuwit.gcp.mongodb.net/test?retryWrites=true&w=majority`;
 
-const uri_srv =
-  'mongodb+srv://xxyyzz2050:Xx159753%2540%2540@cluster-test-kuwit.gcp.mongodb.net/test?retryWrites=true&w=majority';
-
-// without srv
-app.get('/mongoose', (req, res) => {
+function connect(res, srv) {
   // close the connection before re-connecting, to avoid MongooseError: You can not `mongoose.connect()` multiple times while connected.
   mongoose.connection.close();
-  return mongoose
+  console.log('connecting.....');
+  mongoose
     .connect(
-      uri,
+      srv ? uri_srv : uri,
       options
     )
     .then(db => {
       console.log('connected');
-      res.json({ test: 'mongoose' });
+      res.json({ test: 'mongoose' + srv ? '-srv' : '' });
     })
     .catch(err => {
       console.log('err:', err);
-      res.json({ test: 'error' });
+      res.json({ test: 'error' + srv ? '-srv' : '' });
     });
+}
+// without srv
+app.get('/mongoose', (req, res) => {
+  connect(
+    res,
+    false
+  );
 });
 
 // using srv
 app.get('/mongoose-srv', (req, res) => {
-  mongoose.connection.close();
-  return mongoose
-    .connect(
-      uri_srv,
-      options
-    )
-    .then(db => {
-      console.log('connected');
-      res.json({ test: 'mongoose-srv' });
-    })
-    .catch(err => {
-      console.log('err:', err);
-      res.json({ test: 'error-srv' });
-    });
+  connect(
+    res,
+    true
+  );
 });
 
 app.get('*', (req, res) => {
