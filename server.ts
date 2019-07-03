@@ -60,6 +60,13 @@ const uri_srv = `mongodb+srv://${auth}@cluster-test-kuwit.gcp.mongodb.net/test?r
 function connect(res, srv) {
   // close the connection before re-connecting, to avoid MongooseError: You can not `mongoose.connect()` multiple times while connected.
   mongoose.connection.close();
+
+  /*
+    issues:
+      - mongoose.connect() dosen't work here, although it works outside Angular, run `node test-mongoose`
+      - console logs 'connecting....' twice, even if we navigated to /mongoose only once
+
+   */
   console.log('connecting.....');
   mongoose
     .connect(
