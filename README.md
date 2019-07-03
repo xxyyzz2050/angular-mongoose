@@ -8,3 +8,5 @@ run `npm run start`
 - navigate to /mongoose it suppose to make a connection via mongoose (without srv) and response with {test: mongoose} or {test: "error"}
 
 - navigate to /mongoose-srv to test the connection using srv, it should response with {test: "mongoose-srv"} or {test: "error-srv"}
+
+- to test the connection outside of Angular run `node test-mongoose`
