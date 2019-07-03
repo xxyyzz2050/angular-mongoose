@@ -8,6 +8,7 @@ import { provideModuleMap } from '@nguniversal/module-map-ngfactory-loader';
 
 import * as express from 'express';
 import { join } from 'path';
+import mongoose from 'mongoose';
 
 // Faster server renders w/ Prod mode (dev mode never needed)
 enableProdMode();
@@ -43,9 +44,60 @@ app.get(
   })
 );
 
-// All regular routes use the Universal engine
+const options = {
+  useCreateIndex: true,
+  useNewUrlParser: true,
+  useFindAndModify: false,
+  bufferCommands: false,
+  autoIndex: false,
+  retryWrites: true
+};
+
+const uri =
+  'mongodb://xxyyzz2050:Xx159753%2540%2540@cluster-test-shard-00-00-kuwit.gcp.mongodb.net:27017,cluster-test-shard-00-01-kuwit.gcp.mongodb.net:27017,cluster-test-shard-00-02-kuwit.gcp.mongodb.net:27017/test?ssl=true&replicaSet=Cluster-test-shard-0&authSource=admin&retryWrites=true&w=majority';
+
+const uri_srv =
+  'mongodb+srv://xxyyzz2050:Xx159753%2540%2540@cluster-test-kuwit.gcp.mongodb.net/test?retryWrites=true&w=majority';
+
+// without srv
+app.get('/mongoose', (req, res) => {
+  // close the connection before re-connecting, to avoid MongooseError: You can not `mongoose.connect()` multiple times while connected.
+  mongoose.connection.close();
+  return mongoose
+    .connect(
+      uri,
+      options
+    )
+    .then(db => {
+      console.log('connected');
+      res.json({ test: 'mongoose' });
+    })
+    .catch(err => {
+      console.log('err:', err);
+      res.json({ test: 'error' });
+    });
+});
+
+// using srv
+app.get('/mongoose-srv', (req, res) => {
+  mongoose.connection.close();
+  return mongoose
+    .connect(
+      uri_srv,
+      options
+    )
+    .then(db => {
+      console.log('connected');
+      res.json({ test: 'mongoose-srv' });
+    })
+    .catch(err => {
+      console.log('err:', err);
+      res.json({ test: 'error-srv' });
+    });
+});
+
 app.get('*', (req, res) => {
-  res.render('index', { req });
+  res.json({ test: 'ok' });
 });
 
 // Start up the Node server
